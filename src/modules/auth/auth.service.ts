@@ -1,6 +1,7 @@
 import { pool } from "../../config/db";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken";
+import config from "../../config";
 const signUp = async (payload: Record<string, unknown>) => {
   const { name, email, password, phone, role } = payload;
   const hashedPassword = await bcrypt.hash(password as string, 12);
@@ -14,6 +15,7 @@ const signUp = async (payload: Record<string, unknown>) => {
 };
 
 const signIn = async (payload: Record<string, unknown>) => {
+    
   const { email, password } = payload;
   const result = await pool.query(
     `SELECT * FROM users WHERE email = $1`,
@@ -27,8 +29,12 @@ const signIn = async (payload: Record<string, unknown>) => {
   if (!isMatch) {
     throw new Error("Invalid password");
   }
+
   delete result.rows[0].password;
-  return result;
+  const token = jwt.sign(result.rows[0],config.jwt_secret as string,{expiresIn: '3d'})
+
+  const newRes = {token, user: result.rows[0]}
+  return newRes;
 };
 
 
