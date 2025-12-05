@@ -23,6 +23,9 @@ const updateUser = async(req:Request, res:Response) => {
 
 const deleteUser = async(req:Request, res:Response) => {
     try {
+        if(req.user!.role !== "admin" || req.user!.id !== Number(req.params.userId)) {
+            return res.status(403).json({success: false, message: "Forbidden", error: "You are not authorized to update this user"});
+        }
         const result = await userServices.deleteUser(Number(req.params.userId));
         return res.status(200).json({success: true, message: "User deleted successfully", data: result.rows[0]})
     } catch (error:any) {
