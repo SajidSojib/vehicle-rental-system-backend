@@ -2,7 +2,6 @@ import express from "express";
 import initDB from "./config/db";
 import { userRoutes } from "./modules/users/user.route";
 import { authRoutes } from "./modules/auth/auth.route";
-import config from "./config";
 const app = express();
 
 
@@ -16,8 +15,8 @@ initDB();
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-app.use(`${config.baseURL}/users`, userRoutes);
-app.use(`${config.baseURL}/auth`, authRoutes);
+app.use(`/api/v1/users`, userRoutes);
+app.use(`/api/v1/auth`, authRoutes);
 
 
 export default app;
