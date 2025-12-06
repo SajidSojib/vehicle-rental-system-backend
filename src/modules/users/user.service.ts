@@ -1,14 +1,25 @@
 import { pool } from "../../config/db";
-
+import bcrypt from "bcrypt";
 
 const getAllUsers = async () => {
   const result = pool.query(`SELECT id, name, email, phone, role FROM users`);
   return result;
 };
 
-const updateUser = async(userId: number, payload: Record<string, unknown>) => {
-    const { name, email, password, phone, role } = payload;
-    const result = pool.query(`UPDATE users SET name = $1, email = $2, password = $3, phone = $4, role = $5 WHERE id = $6 RETURNING *`, [name, email, password, phone, role, userId]);
+const updateUser = async(userId: number, payload: Record<string, unknown>, modifiedBy: string) => {
+    if(payload?.password){
+        const hashedPassword = await bcrypt.hash(payload.password as string, 12);
+        payload.password = hashedPassword;
+    }
+    if(modifiedBy !== "admin"){
+        delete payload.role;
+    }
+
+    const fields = Object.keys(payload);
+    const values = Object.values(payload);
+    const stringPair = fields.map((field, index) => `${field} = $${index + 1}`);
+
+    const result = pool.query(`UPDATE users SET ${stringPair.join(", ")} WHERE id = $${fields.length + 1} RETURNING *`, [...values, userId]);
     return result;
 }
 
