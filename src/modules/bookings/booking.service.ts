@@ -33,7 +33,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
             daily_rent_price: vehicle.rows[0].daily_rent_price
         }
     }
-    changeVehicleAvailability(Number(vehicle_id), "booked");
+    const wait =await changeVehicleAvailability(Number(vehicle_id), "booked");
     return result;
 }
 
