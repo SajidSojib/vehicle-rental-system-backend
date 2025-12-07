@@ -92,7 +92,7 @@ const updateBooking = async (id: number, payload: Record<string, unknown>, modif
         }
         const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
         changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
-        return result.rows[0];
+        return { ...result.rows[0], vehicle: { availability_status : "available"} };
     }
     else if(modifiedBy === "customer"){
         if(status !== 'cancelled'){
@@ -101,7 +101,7 @@ const updateBooking = async (id: number, payload: Record<string, unknown>, modif
         const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
         changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
         return result.rows[0];
-    }
+    } 
 }
 
 
