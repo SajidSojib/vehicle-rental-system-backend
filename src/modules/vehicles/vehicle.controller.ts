@@ -9,7 +9,7 @@ const createVehicle = async (req:Request, res:Response) => {
         const result = await vehicleServices.createVehicle(req.body);
         return res.status(201).json({success: true, message: "Vehicle created successfully", data: result.rows[0]})
     } catch (error:any) {
-        return res.status(500).json({success: false, message: 'vehicle creation failed', error: error.message});
+        return res.status(500).json({success: false, message: error.message, error: error});
     }
 }
 
@@ -19,7 +19,7 @@ const getAllVehicles = async(req:Request, res:Response) => {
         return res.status(200).json({success: true, message: result.rowCount ? "Vehicles retrieved successfully" : "No vehicles found", data: result.rows})
 
     } catch (error:any) {
-        return res.status(500).json({success: false, message: 'vehicle retrieval failed', error: error.message});
+        return res.status(500).json({success: false, message: error.message, error: error});
     }
 }
 
@@ -29,7 +29,7 @@ const getVehicleById = async(req:Request, res:Response) => {
         return res.status(200).json({success: true, message: result.rowCount ? "Vehicle retrieved successfully" : "No vehicle found for this id", data: result.rows[0]})
 
     } catch (error:any) {
-        return res.status(500).json({success: false, message: 'vehicle retrieval failed', error: error.message});
+        return res.status(500).json({success: false, message: error.message, error: error});
     }
 }
 
@@ -47,7 +47,22 @@ const updateVehicle = async(req:Request, res:Response) => {
 
 const deleteVehicle = async(req:Request, res:Response) => {
     try {
-        const result = await vehicleServices.deleteVehicle(Number(req.params.vehicleId));
+        const vehicle = await vehicleServices.getVehicleById(Number(req.params.vehicleId));
+
+        if(vehicle.rowCount === 0) {
+            return res.status(404).json({success: false, message: "Vehicle not found", error: "No vehicle found for this id"});
+        }
+        if (vehicle.rows[0].availability_status === "booked") {
+          return res.status(403).json({
+              success: false,
+              message: "Forbidden",
+              error: "Vehicle is currently booked",
+            });
+        }
+
+        const result = await vehicleServices.deleteVehicle(
+          Number(req.params.vehicleId)
+        );
         return res.status(200).json({success: true, message: "Vehicle deleted successfully", data: result.rows[0]})
     } catch (error:any) {
         return res.status(500).json({success: false, message: 'vehicle deletion failed', error: error.message});

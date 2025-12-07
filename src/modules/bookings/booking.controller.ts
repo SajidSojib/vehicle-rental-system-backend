@@ -32,6 +32,9 @@ const getAllBookings = async(req:Request, res:Response) => {
 
 const updateBooking = async(req:Request, res:Response) => {
     try {
+        if(Object.keys(req.body).length === 0) {
+            return res.status(400).json({success: false, message: "Bad request", error: "No data provided"});
+        }
         const bookingId = Number(req.params.id);
         const modifiedBy = req.user!.role;
         const result = await bookingServices.updateBooking(bookingId, req.body, modifiedBy);
