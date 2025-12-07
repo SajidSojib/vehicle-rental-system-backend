@@ -15,7 +15,7 @@ initDB();
 
 //** ROUTES ***/
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Welcome to Vehicle Rental System");
 });
 app.use(`/api/v1/users`, userRoutes);
 app.use(`/api/v1/auth`, authRoutes);

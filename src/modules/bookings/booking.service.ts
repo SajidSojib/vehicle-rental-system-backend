@@ -19,8 +19,6 @@ const createBooking = async (payload: Record<string, unknown>) => {
     const total_price = getTotalPrice(start_date, end_date, vehicle.rows[0].daily_rent_price);
 
     const booking = await pool.query(`INSERT INTO bookings (customer_id, vehicle_id, total_price, rent_start_date, rent_end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [customer_id, vehicle_id, total_price, rent_start_date, rent_end_date]);
-    console.log(start_date);
-    console.log(rent_start_date);
     
     const result = {
         id: booking.rows[0].id,
@@ -88,23 +86,23 @@ const getAllBookings = async (modifiedBy: string, userId: number) => {
     }
 }
 
-const updateBooking = async (id: number, payload: Record<string, unknown>, modifiedBy: string) => {
+const updateBooking = async (id: number, payload: Record<string, unknown>, modifiedBy: string, userId: number) => {
     const {status} = payload;
-    if(modifiedBy === "admin"){
-        if(status !== 'returned'){
-            throw new Error("Only returned status can be updated by admin");
-        }
-        const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
-        changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
-        return { ...result.rows[0], vehicle: { availability_status : "available"} };
+    console.log(id);
+    const booking = await pool.query(`SELECT * FROM bookings WHERE id = $1`, [id]);
+    console.log(booking.rows[0]);
+    if((status === 'returned' && modifiedBy==='admin')){
+      const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
+      changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
+      return { ...result.rows[0], vehicle: { availability_status : "available"} };
     }
-    else if(modifiedBy === "customer"){
-        if(status !== 'cancelled'){
-            throw new Error("Only cancelled status can be updated by customer");
-        }
-        const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
-        changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
-        return result.rows[0];
+    else if((status === 'cancelled' && modifiedBy === 'customer' && Number(booking.rows[0].customer_id) === userId)){
+      const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
+      changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
+      return result.rows[0];
+    }
+    else{
+      throw new Error("Only returned status can be updated by admin and only cancelled status can be updated by customer");
     } 
 }
 
