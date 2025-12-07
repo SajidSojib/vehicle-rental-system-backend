@@ -1,4 +1,5 @@
 import { pool } from "../../config/db";
+import changeVehicleAvailability from "../../utils/changeVehicleAvailability";
 import getCustomer from "../../utils/getCustomer";
 import getTotalPrice from "../../utils/getTotalPrice";
 import getVehicle from "../../utils/getVehicle";
@@ -10,6 +11,9 @@ const createBooking = async (payload: Record<string, unknown>) => {
     const end_date = parseDate(rental_end_date);
     
     const vehicle = await getVehicle(Number(vehicle_id));
+    if(vehicle.rows[0].availability_status === "booked"){
+        throw new Error("Vehicle is already booked");
+    }
     const total_price = getTotalPrice(start_date, end_date, vehicle.rows[0].daily_rent_price);
 
     const booking = await pool.query(`INSERT INTO bookings (customer_id, vehicle_id, total_price, status, rental_start_date, rental_end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [customer_id, vehicle_id, total_price, start_date, end_date]);
@@ -27,6 +31,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
             daily_rent_price: vehicle.rows[0].daily_rent_price
         }
     }
+    changeVehicleAvailability(Number(vehicle_id), "booked");
     return result;
 }
 
@@ -77,12 +82,33 @@ const getAllBookings = async (modifiedBy: string, userId: number) => {
         });
         return await Promise.all(result);
     }
+}
 
+const updateBooking = async (id: number, payload: Record<string, unknown>, modifiedBy: string) => {
+    const {status} = payload;
+    if(modifiedBy === "admin"){
+        if(status !== 'returned'){
+            throw new Error("Only returned status can be updated by admin");
+        }
+        const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
+        changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
+        return result.rows[0];
+    }
+    else if(modifiedBy === "customer"){
+        if(status !== 'cancelled'){
+            throw new Error("Only cancelled status can be updated by customer");
+        }
+        const result = await pool.query(`UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *`, [status, id]);
+        changeVehicleAvailability(Number(result.rows[0].vehicle_id), "available");
+        return result.rows[0];
+    }
 }
 
 
 
 
 export const bookingServices = {
-    createBooking
+    createBooking,
+    getAllBookings,
+    updateBooking
 }
