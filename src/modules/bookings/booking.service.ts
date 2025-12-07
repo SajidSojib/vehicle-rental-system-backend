@@ -6,17 +6,21 @@ import getVehicle from "../../utils/getVehicle";
 import parseDate from "../../utils/perseDate";
 
 const createBooking = async (payload: Record<string, unknown>) => {
-    const {customer_id, vehicle_id, rental_start_date, rental_end_date} = payload;
-    const start_date = parseDate(rental_start_date);
-    const end_date = parseDate(rental_end_date);
-    
+    const {customer_id, vehicle_id, rent_start_date, rent_end_date} = payload;
+    const start_date = parseDate(rent_start_date);
+    const end_date = parseDate(rent_end_date);
     const vehicle = await getVehicle(Number(vehicle_id));
     if(vehicle.rows[0].availability_status === "booked"){
         throw new Error("Vehicle is already booked");
     }
+    if(vehicle.rowCount === 0){
+        throw new Error("No vehicle found for this id");
+    }
     const total_price = getTotalPrice(start_date, end_date, vehicle.rows[0].daily_rent_price);
 
-    const booking = await pool.query(`INSERT INTO bookings (customer_id, vehicle_id, total_price, status, rental_start_date, rental_end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [customer_id, vehicle_id, total_price, start_date, end_date]);
+    const booking = await pool.query(`INSERT INTO bookings (customer_id, vehicle_id, total_price, rent_start_date, rent_end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [customer_id, vehicle_id, total_price, rent_start_date, rent_end_date]);
+    console.log(start_date);
+    console.log(rent_start_date);
     
     const result = {
         id: booking.rows[0].id,
@@ -24,8 +28,8 @@ const createBooking = async (payload: Record<string, unknown>) => {
         vehicle_id: booking.rows[0].vehicle_id,
         total_price: booking.rows[0].total_price,
         status: booking.rows[0].status,
-        rental_start_date: booking.rows[0].rental_start_date,
-        rental_end_date: booking.rows[0].rental_end_date,
+        rent_start_date: booking.rows[0].rent_start_date,
+        rent_end_date: booking.rows[0].rent_end_date,
         vehicle: {
             vehicle_name: vehicle.rows[0].vehicle_name,
             daily_rent_price: vehicle.rows[0].daily_rent_price
@@ -47,8 +51,8 @@ const getAllBookings = async (modifiedBy: string, userId: number) => {
             vehicle_id: booking.vehicle_id,
             total_price: booking.total_price,
             status: booking.status,
-            rental_start_date: booking.rental_start_date,
-            rental_end_date: booking.rental_end_date,
+            rent_start_date: booking.rent_start_date,
+            rent_end_date: booking.rent_end_date,
             customer: {
               name: customer.rows[0].name,
               email: customer.rows[0].email,
@@ -71,8 +75,8 @@ const getAllBookings = async (modifiedBy: string, userId: number) => {
             vehicle_id: booking.vehicle_id,
             total_price: booking.total_price,
             status: booking.status,
-            rental_start_date: booking.rental_start_date,
-            rental_end_date: booking.rental_end_date,
+            rent_start_date: booking.rent_start_date,
+            rent_end_date: booking.rent_end_date,
             vehicle: {
               vehicle_name: vehicle.rows[0].vehicle_name,
               registration_number: vehicle.rows[0].registration_number,

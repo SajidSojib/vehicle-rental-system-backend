@@ -22,10 +22,16 @@ const getVehicleById = async (vehicleId: number) => {
 
 const updateVehicle = async (vehicleId: number, payload: Record<string, unknown>) => {
     await autoReturnBookings();
+
+    const currentVehicle = await getVehicleById(vehicleId);
+    if (currentVehicle.rows[0].availability_status !== payload.availability_status && payload.availability_status === "available") {
+        await pool.query(`UPDATE bookings SET status = 'returned' WHERE vehicle_id = $1 AND status = 'active'`, [vehicleId]);
+    }
     const fields = Object.keys(payload);
     const values = Object.values(payload);
     const stringPair = fields.map((field, index) => `${field} = $${index + 1}`);
     const result = pool.query(`UPDATE vehicles SET ${stringPair.join(", ")} WHERE id = $${fields.length + 1} RETURNING *`, [...values, vehicleId]);
+    await autoReturnBookings();
     return result;
 };
 

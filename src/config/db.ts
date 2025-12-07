@@ -15,7 +15,7 @@ const initDB = async () => {
             email VARCHAR(255) NOT NULL UNIQUE CHECK (email = LOWER(email)),
             password TEXT NOT NULL CHECK (LENGTH(password) >= 6),
             phone VARCHAR(15) NOT NULL,
-            role VARCHAR(15) NOT NULL CHECK (role IN ('admin', 'customer'))
+            role VARCHAR(15) NOT NULL DEFAULT 'customer' CHECK (role IN ('admin', 'customer'))
         );`);
 
     await pool.query(`
@@ -35,8 +35,8 @@ const initDB = async () => {
             vehicle_id INT NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
             total_price INT NOT NULL CHECK (total_price > 0),
             status VARCHAR(15) DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'returned')),
-            rental_start_date DATE NOT NULL CHECK (rental_start_date >= CURRENT_DATE),
-            rental_end_date DATE NOT NULL CHECK (rental_end_date > rental_start_date)
+            rent_start_date DATE NOT NULL CHECK (rent_start_date >= CURRENT_DATE),
+            rent_end_date DATE NOT NULL CHECK (rent_end_date > rent_start_date)
         )`)
     
     console.log('db connected');

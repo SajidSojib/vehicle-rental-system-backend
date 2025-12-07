@@ -5,6 +5,9 @@ import { autoReturnBookings } from "../../utils/autoReturnBooking";
 const createBooking = async(req:Request, res:Response) => {
     try {
         await autoReturnBookings();
+        if(req.user!.id!==Number(req.body.customer_id && req.user!.role !== "admin")) {
+            return res.status(403).json({success: false, message: "Forbidden", error: "You are not authorized to create this booking"});
+        }
         const result = await bookingServices.createBooking(req.body);
         return res
           .status(201)
@@ -24,7 +27,7 @@ const getAllBookings = async(req:Request, res:Response) => {
         const modifiedBy = req.user!.role;
         const userId = req.user!.id;
         const result = await bookingServices.getAllBookings(modifiedBy, Number(userId));
-        if(result?.length) {
+        if(!result?.length) {
             return res.status(200).json({success: true, message: "No bookings exists", data: result})
         }
         return res.status(200).json({success: true, message: "Bookings retrieved successfully", data: result})

@@ -5,7 +5,7 @@ export const autoReturnBookings = async () => {
         UPDATE bookings
         SET status = 'returned'
         WHERE status = 'active'
-        AND rental_end_date < CURRENT_DATE
+        AND rent_end_date < CURRENT_DATE
     `);
 
   await pool.query(`
