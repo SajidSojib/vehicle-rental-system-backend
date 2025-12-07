@@ -1,5 +1,5 @@
 import { pool } from "../../config/db";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const getAllUsers = async () => {
   const result = pool.query(`SELECT id, name, email, phone, role FROM users`);
