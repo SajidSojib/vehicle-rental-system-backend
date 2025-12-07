@@ -9,13 +9,49 @@
 
 The Vehicle Rental System is a backend API for managing a vehicle rental service. It allows admins to manage vehicles, users, and bookings, and enables customers to create and manage their bookings. The system includes secure role-based authentication and automatic booking management.
 
-**Key Features:**
+---
 
-* **Vehicles:** Add, update, view, and delete vehicles with availability tracking.
-* **Users:** Manage customer accounts with role-based access control (Admin & Customer roles).
-* **Bookings:** Create, update, view, cancel, and auto-return bookings with total price calculation.
-* **Authentication:** Secure password hashing and JWT-based login.
-* **Authorization:** Role-based access for Admin and Customer functionalities.
+## 🌟 Features
+
+### 1. **User Management**
+
+* **Customer Accounts**: Users can create accounts, login securely, and update their personal information like name, phone number, and email.
+* **Admin Controls**: Admins can manage all users in the system, change roles (admin or customer), and delete accounts if necessary.
+* **Access Control**: Only authorized users can perform certain actions. For example, only admins can delete vehicles or see all users.
+
+### 2. **Vehicle Inventory Management**
+
+* **Add & Update Vehicles**: Admins can add new vehicles with details like type, registration number, and daily rental price. They can also update information if anything changes.
+* **Availability Tracking**: The system tracks whether a vehicle is available for rent or already booked. Customers can only book available vehicles.
+* **Vehicle Types**: Supports multiple vehicle types like cars, bikes, vans, and SUVs, making it easy to filter and find the right vehicle.
+
+### 3. **Booking & Rental System**
+
+* **Easy Booking**: Customers can book vehicles for a chosen date range. The system automatically calculates the total cost based on daily rental rates.
+* **Booking Status**: Bookings have statuses like `active`, `cancelled`, or `returned`.
+* **Automatic Updates**: When a booking is created, the vehicle status changes to `booked`. When a booking ends or is cancelled, the vehicle becomes `available` again.
+* **Admin Booking Controls**: Admins can view all bookings, update statuses, and mark vehicles as returned after rental.
+
+### 4. **Secure Authentication**
+
+* **Password Security**: User passwords are encrypted using `bcryptjs` to prevent unauthorized access.
+* **JWT Tokens**: After login, users receive a secure token that must be included in requests to protected routes.
+* **Role-Based Access**: Customers can only manage their own data and bookings. Admins have full access to manage the system.
+
+### 5. **Data Validation & Error Handling**
+
+* **Input Checks**: Ensures user-provided information is correct, e.g., valid email, minimum password length, and proper booking dates.
+* **Consistent Responses**: API responses follow a standard format, so it’s easy to handle success and error messages on the client side.
+
+### 6. **Modular & Scalable Architecture**
+
+* **Feature-Based Modules**: Code is organized into modules like Users, Vehicles, Bookings, and Auth. Each module has its own routes, controllers, and services.
+* **Easy to Extend**: New features or modules can be added without affecting existing code, keeping the system maintainable.
+
+### 7. **Admin Dashboard Ready**
+
+* **System Overview**: Admins can see all users, vehicles, and bookings in one place.
+* **Quick Actions**: Admins can quickly update vehicle availability, cancel bookings, or change user roles.
 
 ---
 
@@ -69,44 +105,6 @@ Each module contains **routes**, **controllers**, and **services** for clear sep
 
 ---
 
-## 📊 Database Schema
-
-### Users Table
-
-| Field    | Type   | Notes                       |
-| -------- | ------ | --------------------------- |
-| id       | Serial | Auto-generated              |
-| name     | String | Required                    |
-| email    | String | Required, unique, lowercase |
-| password | String | Required, min 6 characters  |
-| phone    | String | Required                    |
-| role     | String | 'admin' or 'customer'       |
-
-### Vehicles Table
-
-| Field               | Type   | Notes                       |
-| ------------------- | ------ | --------------------------- |
-| id                  | Serial | Auto-generated              |
-| vehicle_name        | String | Required                    |
-| type                | String | 'car', 'bike', 'van', 'SUV' |
-| registration_number | String | Required, unique            |
-| daily_rent_price    | Number | Required, positive          |
-| availability_status | String | 'available' or 'booked'     |
-
-### Bookings Table
-
-| Field           | Type   | Notes                                |
-| --------------- | ------ | ------------------------------------ |
-| id              | Serial | Auto-generated                       |
-| customer_id     | Int    | Foreign key to Users table           |
-| vehicle_id      | Int    | Foreign key to Vehicles table        |
-| rent_start_date | Date   | Required                             |
-| rent_end_date   | Date   | Required, must be after start date   |
-| total_price     | Number | Required, positive                   |
-| status          | String | 'active', 'cancelled', or 'returned' |
-
----
-
 ## 🔐 Authentication & Authorization
 
 * **Admin:** Full access to manage vehicles, users, and all bookings.
@@ -120,43 +118,6 @@ Each module contains **routes**, **controllers**, and **services** for clear sep
 
 ---
 
-## 🌐 API Endpoints
-
-### Authentication
-
-| Method | Endpoint            | Access | Description               |
-| ------ | ------------------- | ------ | ------------------------- |
-| POST   | /api/v1/auth/signup | Public | Register new user         |
-| POST   | /api/v1/auth/signin | Public | Login & receive JWT token |
-
-### Vehicles
-
-| Method | Endpoint                    | Access | Description                          |
-| ------ | --------------------------- | ------ | ------------------------------------ |
-| POST   | /api/v1/vehicles            | Admin  | Add new vehicle                      |
-| GET    | /api/v1/vehicles            | Public | Get all vehicles                     |
-| GET    | /api/v1/vehicles/:vehicleId | Public | Get vehicle by ID                    |
-| PUT    | /api/v1/vehicles/:vehicleId | Admin  | Update vehicle details               |
-| DELETE | /api/v1/vehicles/:vehicleId | Admin  | Delete vehicle if no active bookings |
-
-### Users
-
-| Method | Endpoint              | Access    | Description                       |
-| ------ | --------------------- | --------- | --------------------------------- |
-| GET    | /api/v1/users         | Admin     | Get all users                     |
-| PUT    | /api/v1/users/:userId | Admin/Own | Update user info                  |
-| DELETE | /api/v1/users/:userId | Admin     | Delete user if no active bookings |
-
-### Bookings
-
-| Method | Endpoint                    | Access         | Description                                |
-| ------ | --------------------------- | -------------- | ------------------------------------------ |
-| POST   | /api/v1/bookings            | Customer/Admin | Create booking with auto price calculation |
-| GET    | /api/v1/bookings            | Role-based     | Admin sees all, Customer sees own          |
-| PUT    | /api/v1/bookings/:bookingId | Role-based     | Cancel (Customer) or Return (Admin)        |
-
-
----
 
 ## ⚙️ Setup & Usage
 
