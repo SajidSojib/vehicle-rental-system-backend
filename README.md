@@ -1,5 +1,3 @@
----
-
 # 🚗 Vehicle Rental System (Backend)
 
 **Live Deployment:** [rental-vehicle-mu.vercel.app](https://rental-vehicle-mu.vercel.app/)
