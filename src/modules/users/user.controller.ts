@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { userServices } from "./user.service";
+import { autoReturnBookings } from "../../utils/autoReturnBooking";
 
 const getAllUsers = async(req:Request, res:Response) => {
     try {
@@ -26,6 +27,8 @@ const updateUser = async(req:Request, res:Response) => {
 
 const deleteUser = async(req:Request, res:Response) => {
     try {
+        await autoReturnBookings();
+
         if(req.user!.role !== "admin" || req.user!.id !== Number(req.params.userId)) {
             return res.status(403).json({success: false, message: "Forbidden", error: "You are not authorized to update this user"});
         }

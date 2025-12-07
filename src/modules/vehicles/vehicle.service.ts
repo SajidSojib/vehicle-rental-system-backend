@@ -1,4 +1,5 @@
 import { pool } from "../../config/db";
+import { autoReturnBookings } from "../../utils/autoReturnBooking";
 
 const createVehicle = async (payload: Record<string, unknown>) => {
     const fields = Object.keys(payload);
@@ -8,16 +9,19 @@ const createVehicle = async (payload: Record<string, unknown>) => {
 };
 
 const getAllVehicles = async () => {
+    await autoReturnBookings();
     const result = pool.query(`SELECT * FROM vehicles`);
     return result;
 };
 
 const getVehicleById = async (vehicleId: number) => {
+    await autoReturnBookings();
     const result = pool.query(`SELECT * FROM vehicles WHERE id = $1`, [vehicleId]);
     return result;
 };
 
 const updateVehicle = async (vehicleId: number, payload: Record<string, unknown>) => {
+    await autoReturnBookings();
     const fields = Object.keys(payload);
     const values = Object.values(payload);
     const stringPair = fields.map((field, index) => `${field} = $${index + 1}`);

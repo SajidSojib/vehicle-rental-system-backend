@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { bookingServices } from "./booking.service";
+import { autoReturnBookings } from "../../utils/autoReturnBooking";
 
 const createBooking = async(req:Request, res:Response) => {
     try {
+        await autoReturnBookings();
         const result = await bookingServices.createBooking(req.body);
         return res
           .status(201)
@@ -18,6 +20,7 @@ const createBooking = async(req:Request, res:Response) => {
 
 const getAllBookings = async(req:Request, res:Response) => {
     try {
+        await autoReturnBookings();
         const modifiedBy = req.user!.role;
         const userId = req.user!.id;
         const result = await bookingServices.getAllBookings(modifiedBy, Number(userId));
@@ -32,6 +35,7 @@ const getAllBookings = async(req:Request, res:Response) => {
 
 const updateBooking = async(req:Request, res:Response) => {
     try {
+        await autoReturnBookings();
         if(Object.keys(req.body).length === 0) {
             return res.status(400).json({success: false, message: "Bad request", error: "No data provided"});
         }

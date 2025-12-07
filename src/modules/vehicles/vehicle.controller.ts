@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { vehicleServices } from "./vehicle.service";
+import { autoReturnBookings } from "../../utils/autoReturnBooking";
 
 const createVehicle = async (req:Request, res:Response) => {
     try {
@@ -47,6 +48,7 @@ const updateVehicle = async(req:Request, res:Response) => {
 
 const deleteVehicle = async(req:Request, res:Response) => {
     try {
+        await autoReturnBookings();
         const vehicle = await vehicleServices.getVehicleById(Number(req.params.vehicleId));
 
         if(vehicle.rowCount === 0) {
