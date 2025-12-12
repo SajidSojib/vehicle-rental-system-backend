@@ -10,9 +10,8 @@ const createBooking = async (payload: Record<string, unknown>) => {
     const start_date = parseDate(rent_start_date);
     const end_date = parseDate(rent_end_date);
     const vehicle = await getVehicle(Number(vehicle_id));
-    
-    if(vehicle.rows[0]?.availability_status === "booked"){
-        throw new Error("Vehicle is already booked");
+    if (vehicle.rows[0]?.availability_status === "booked") {
+      throw new Error("Vehicle is already booked");
     }
     if(vehicle?.rowCount === 0){
         throw new Error("No vehicle found for this id");

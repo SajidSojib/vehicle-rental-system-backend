@@ -11,7 +11,6 @@ const auth = (...roles: ("admin" | "customer")[]) =>{
                 return res.status(401).json({success: false, message: "Unauthorized", error: "Missing or invalid authentication token"});
             }
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-
             const user = await pool.query(`SELECT email FROM users WHERE id = $1`, [decoded.id]);
             if (user.rows.length === 0) {
                 return res.status(401).json({success: false, message: "Unauthorized", error: "User not found"});
