@@ -18,6 +18,9 @@ const updateUser = async(req:Request, res:Response) => {
         if(Object.keys(req.body).length === 0) {
             return res.status(400).json({success: false, message: "Bad request", error: "No data provided"});
         }
+        if(Number(req.params.userId) !== req.user!.id || req.user!.role !== "admin") {
+            return res.status(403).json({success: false, message: "Forbidden", error: "You are not authorized to update this user"});
+        }
         const result = await userServices.updateUser(Number(req.params.userId), req.body, req.user!.role);
         return res.status(200).json({success: true, message: "User updated successfully", data: result.rows[0]})
     } catch (error:any) {
